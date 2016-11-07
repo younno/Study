@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src='http://220.117.179.197/resources/js/jquery-1.11.2.min.js' ></script>
+<script type="text/javascript">
+	
+	function MemberValidation(jsonStr){
+		var jsonObj = JSON.parse(jsonStr);
+		var result = jsonObj.MemberValidation;
+		var act_url = "/CATCHAPP_MW/member";
+		if(result != undefined){
+			for(var i=0;i<result.length;i++){
+				$("#vchUSER_ID").val(result[i].id);
+				$("#chLOGIN_TYPE").val(result[i].login_type);
+				$("#vchSerialNo").val(result[i].IMEI);
+			}
+			if($("#vchUSER_ID").val() != "" && $("#chLOGIN_TYPE").val() != "" && $("#vchSerialNo").val() != ""){
+				$("#LOGIN_AUTO").val("Y");
+				act_url = "/CATCHAPP_MW/login/proc";
+			}
+		}
+		
+		setTimeout(function(){
+			$("#frm").attr({
+				action : act_url
+			}).submit(); 
+		}, 3000);
+		
+	}
+	
+ 	$(document).ready(function(){
+ 		//MemberValidation('{"MemberValidation": [{"id": "zebal82", "login_type": "1", "IMEI": "123"}]}');
+ 		//MemberValidation('{"MemberValidation": [{"id": "", "login_type": "", "IMEI": "123123123123"}]}');
+	});
+ 	
+</script>
+</head>
+<body>
+<form id="frm" name="frm" method="post">
+	<input type="hidden" name="vchUSER_ID" id="vchUSER_ID" value=""/>
+	<input type="hidden" name=chLOGIN_TYPE id="chLOGIN_TYPE" value=""/>
+	<input type="hidden" name="vchSerialNo" id="vchSerialNo" value=""/>
+	<input type="hidden" name="LOGIN_AUTO" id="LOGIN_AUTO" value="N"/>
+</form>
+<img alt="index" src="http://220.117.179.197/resources/images/index.jpg" style="width: 100%;height: 100%;"/>
+</body>
+</html>

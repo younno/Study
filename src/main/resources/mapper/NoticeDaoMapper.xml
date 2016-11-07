@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+
+<mapper namespace="com.amway.study.notice.dao.NoticeDaoMapper">
+	
+	<resultMap type="hashmap" id="noticeMap">
+		<result column="decSEQ" 		property="SEQ"/>
+		<result column="vchTITLE" 		property="TITLE"/>
+		<result column="txtCONTENT" 	property="CONTENT"/>
+		<result column="vchOPEN_DATE"	property="OPEN"/>
+		<result column="vchCLOSE_DATE"	property="CLOSE"/>
+		<result column="vchINSERT_USER" property="INSTNM"/>
+		<result column="dtINSERT_DATE" 	property="INSTDT"/>
+	</resultMap>
+	
+	<sql id="page">
+		ORDER BY ${sort}
+		LIMIT ${offset}, ${listSize}
+	</sql>
+
+	<select id="findNoticeList" parameterType="NoticeVO" resultType="NoticeVO">
+		SELECT * 
+		FROM NOTICE
+		<where>
+			<if test="decSEQ != null and decSEQ != '' ">
+				AND decSEQ = #{decSEQ}
+			</if>
+			<if test="chTYPE != null and chTYPE != '' ">
+				AND chTYPE = #{chTYPE}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findNoticeListAjaxCnt" parameterType="NoticeVO" resultMap="noticeMap">
+		SELECT COUNT(IDX) 
+		FROM NOTICE
+		WHERE chDEL_YN = 'N'
+		<if test="decSEQ != null and decSEQ != '' ">
+			AND decSEQ = #{decSEQ}
+		</if>
+		<if test="chTYPE != null and chTYPE != '' ">
+			AND chTYPE = #{chTYPE}
+		</if>
+	</select>
+	
+	<select id="findNoticeListAjax" parameterType="NoticeVO" resultMap="noticeMap">
+		SELECT * 
+		FROM NOTICE
+		WHERE chDEL_YN = 'N'
+		<if test="decSEQ != null and decSEQ != '' ">
+			AND decSEQ = #{decSEQ}
+		</if>
+		<if test="chTYPE != null and chTYPE != '' ">
+			AND chTYPE = #{chTYPE}
+		</if>
+		<include refid="page"></include>
+	</select>
+	
+	
+</mapper>

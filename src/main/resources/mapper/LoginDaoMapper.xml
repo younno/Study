@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+
+<mapper namespace="com.amway.study.login.dao.LoginDaoMapper">
+	
+	<select id="selectUserMst" parameterType="LoginVO" resultType="LoginVO">
+		/*selectUserMst*/
+		SELECT
+			* 
+		FROM USER_MASTER
+		<where>
+			<if test="vchUSER_ID != null and vchUSER_ID != '' ">
+				AND vchUSER_ID = #{vchUSER_ID}
+			</if>
+			<if test="vchPASSWORD != null and vchPASSWORD != '' ">
+				AND vchPASSWORD = #{vchPASSWORD}
+			</if>
+			<if test="vchEMAIL != null and vchEMAIL != '' ">
+				AND vchEMAIL = #{vchEMAIL}
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectUserMstDevice" parameterType="LoginVO" resultType="LoginVO">
+		/*selectUserMstDevice*/
+		SELECT * 
+		FROM USER_MASTER
+		<where>
+			<if test="vchUSER_ID != null and vchUSER_ID != '' ">
+				AND vchUSER_ID = #{vchUSER_ID}
+			</if>
+			<if test="vchSerialNo != null and vchSerialNo != '' ">
+				AND vchSerialNo = #{vchSerialNo}
+			</if>
+			<if test="chLOGIN_TYPE != null and chLOGIN_TYPE != '' ">
+				AND chLOGIN_TYPE = #{chLOGIN_TYPE}
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectUserInfo" parameterType="LoginVO" resultType="map">
+		SELECT A.vchUSER_ID AS USER_ID
+				, A.chLOGIN_TYPE AS LOGIN_TYPE
+				, A.vchUSER_NM AS USER_NM
+				, A.vchEMAIL AS EMAIL
+				, SUM(B.decPOINT_AMT) AS POINT
+		FROM USER_MASTER A 
+			LEFT OUTER JOIN POINT_HIST B
+				ON A.vchUSER_ID = B.vchUSER_ID 
+		<where>
+			<if test="vchUSER_ID != null and vchUSER_ID != '' ">
+				AND A.vchUSER_ID = #{vchUSER_ID}
+			</if>
+		</where>
+	</select>
+	
+	<update id="updateUserMstPassword" parameterType="LoginVO">
+		UPDATE  USER_MASTER
+		   SET vchPASSWORD = #{vchPASSWORD}
+		       , chTEMP_ACCOUNT_YN = 'Y'
+		WHERE vchUSER_ID = #{vchUSER_ID}
+		  AND vchEMAIL = #{vchEMAIL}
+	</update>
+	
+	<update id="updateUserSerialNo" parameterType="LoginVO">
+		UPDATE	USER_MASTER
+		   SET	vchSerialNo = #{vchSerialNo}
+		 WHERE	vchUSER_ID = #{vchUSER_ID}
+	</update>
+	
+	<insert id="insertLoginLog" parameterType="LoginVo">
+		INSERT INTO LOGIN_LOG
+		VALUES (#{vchUSER_ID}, sysdate())
+	</insert>
+	
+</mapper>
