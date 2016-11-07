@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" 	
+	xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" 
+	xmlns:jee="http://www.springframework.org/schema/jee"
+    xmlns:lang="http://www.springframework.org/schema/lang" 
+	xmlns:p="http://www.springframework.org/schema/p"    
+	xmlns:util="http://www.springframework.org/schema/util"	
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+						http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd						
+						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+						http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+						http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
+						http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd
+						http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<bean id="dataSourceConfig"	class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://220.117.179.197/catchapp_database" />
+		<property name="username" value="catch_m" />
+		<property name="password" value="EnDerS1@" />
+		<!-- property name="url" value="jdbc:mysql://10.187.154.61/catchapp_database" /> -->
+		<!-- <property name="password" value="sunghwan" /> -->
+	</bean>
+
+	<bean id="dataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+		<constructor-arg ref="dataSourceConfig" />
+		<property name="logFormatter">
+			<bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+				<property name="loggingType" value="MULTI_LINE" />
+				<property name="sqlPrefix" value="[SQL]" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- Mybatis 세션 팩토리 빈 등록 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.amway.study"></property>
+		<property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+		<property name="configLocation"  value="classpath:config/mybaits.xml" />
+	</bean>
+
+	<!-- sqlSession -->
+	<bean id="sqlSesionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- Mybatis Mapper Auto Scanning 빈 등록 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.amway.study"></property>
+		<property name="annotationClass" value="org.springframework.stereotype.Repository" />
+	</bean>
+	
+	
+	<!-- transactionManager begin -->
+	<!-- DataSource를 활용하는 트랜잭션 매니저를 등록 -->  
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- dataSource 빈을 DataSourceTransactionManager 트랜잭션 매니저의 dataSource 속성에 지정   -->
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+	 
+	<!-- @Transactional 어노테이션에 대한 트랜잭션 처리시 트랜잭션 매니저 transactionManager 빈으로 등록 -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    
+    <!-- AOP advisor 를 활용하여 트랜잭션을 처리함 - ->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!- - 
+                모든 메소드에 대해서 트랜잭션을 활용함
+                기본 propagation 은 REQUIRED 으로 지정됨
+                예외사항의 종류에 따라 롤백을 하지 않는 부분을 지정할 수도 있음
+             - ->
+            <tx:method name="memberProc*" rollback-for="Exception" />
+            <tx:method name="register*" rollback-for="Exception"/>
+	        <tx:method name="save*" rollback-for="Exception"/>
+	        <tx:method name="update*" rollback-for="Exception"/>
+	        <tx:method name="remove*" rollback-for="Exception"/>
+        </tx:attributes>
+    </tx:advice>
+    
+    <aop:config>
+       <!- - execution(modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern) throws-pattern?)
+            위와 같은 패턴으로 아래의 경우에는 하위 패키지 명이 service.impl 이며 이름의 마지막이 ServiceImpl 로 시작되는 모든 클래스의 모든 메소드에 txAdvice 빈을 사용하여 트랜잭션을 사용하도록 한다. - -> 
+        <aop:advisor pointcut="execution(* com.amway.study.*.service.*ServiceImpl.*(..))" advice-ref="txAdvice" />
+    </aop:config>
+    <!- - transactionManager end -->
+
+</beans>
